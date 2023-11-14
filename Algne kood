@@ -1,0 +1,23 @@
+# Siin on projektile algne koodijupp:
+
+import os
+import random
+
+def loe_laulud(žanr):
+    # eeldan, et laulude kaustas on iga žanri kohta eraldi alamkaust?
+    kausta_tee = f"muusika/{žanr}"
+    if not os.path.exists(kausta_tee):
+        print(f"Žanri '{žanr}' laulue ei leitud.")
+        return []
+
+  laulude_nimekiri = [laul for laul in os.listdir(kausta_tee) if laul.endswith(".mp3")]
+  return laulude_nimekiri
+
+
+def loo_playlist(žanr, playlisti_pikkus):
+    laulude_nimekiri = loe_laulud(žanr)
+    if not laulude_nimekiri:
+        return "Playlisti ei saa luua."
+
+    # valib suvalised laulud; maksimaalseks pikkuseks saab võtta kõik laulud mis selles žanris on ja miinimumiks on kasutaja sisestatud playlisti pikkus
+    valitud_laulud = random.sample(laulude_nimekiri, min(playlisti_pikkus, len(laulude_nimekiri)))
