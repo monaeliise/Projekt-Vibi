@@ -1,0 +1,43 @@
+import os
+import random
+import glob
+import time
+import pygame
+
+def loo_playlist(kaust, arv):
+    
+    pygame.init()
+    
+    mp3ed = glob.glob(os.path.join(kaust, '*.mp3'))
+    
+    if not mp3ed:
+        print("Kaustas polnud mp3 faile.")
+        return
+
+    random.shuffle(mp3ed)
+    
+    mp3ed = mp3ed[:arv]
+    
+    for fail in mp3ed:
+        print(f"Mängib: {fail}")
+        
+        pygame.mixer.music.load(fail)
+        
+        pygame.mixer.music.play()
+        
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(5)
+            
+kaust = input("Millisest zanrist laule soovite? Valikus on: rokk, bluus, ooper.")
+
+while True:
+    
+    try:
+        arv = int(input("Mitmest lalulust koosnevat playlisti soovite? "))
+        break
+    except ValueError:
+        print("Sisestage palun positiivne täisarv")
+        
+loo_playlist(kaust, arv)
+
+pygame.quit()
