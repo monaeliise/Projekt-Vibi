@@ -1,0 +1,136 @@
+import os
+import random
+import glob
+import time
+import pygame
+import vlc
+from tkinter import Tk, Label, Button, Entry, StringVar, messagebox, Toplevel
+
+class PlaylistGUI:
+    def __init__(self, master):
+        self.master = master
+        master.title("Juhuslik Esitusloend")
+
+        self.label_zhanr = Label(master, text="Sisesta laulude žanr:")
+        self.label_zhanr.pack()
+
+        self.zhanr_entry = Entry(master, width=30)
+        self.zhanr_entry.pack()
+
+        self.label_kogus = Label(master, text="Sisesta esitusloendi laulude arv:")
+        self.label_kogus.pack()
+
+        self.kogus_entry = Entry(master, width=30)
+        self.kogus_entry.pack()
+
+        self.loo_nupp = Button(master, text="Loo Esitusloend", command=self.loo_esisusloend)
+        self.loo_nupp.pack()
+
+    def loo_esisusloend(self):
+        zhanr = self.zhanr_entry.get()
+        kogus_laulud = self.kogus_entry.get()
+
+        if not zhanr or not kogus_laulud.isdigit():
+            messagebox.showerror("Viga", "Palun sisesta sobivad sisendid.")
+            return
+
+        kogus_laulud = int(kogus_laulud)
+
+        self.master.destroy()  # Sulge aken pärast andmete kogumist
+
+        laulude_kataloog = os.path.join(os.getcwd(), "laulud", zhanr)
+        self.mängi_muusikat(laulude_kataloog, kogus_laulud)
+
+    def mängi_muusikat(self, laulude_kataloog, kogus_laulud):
+        pygame.init()
+        mp3_failid = glob.glob(os.path.join(laulude_kataloog, '*.mp3'))
+
+        if not mp3_failid:
+            print(f"Kataloogis '{laulude_kataloog}' ei leitud ühtegi mp3 faili.")
+            return
+
+        random.shuffle(mp3_failid)
+        valitud_laulud = mp3_failid[:kogus_laulud]
+
+        for laul in valitud_laulud:
+            print(f"Mängib: {laul}")
+
+            pygame.mixer.music.load(laul)
+            pygame.mixer.music.play()
+
+            while pygame.mixer.music.get_busy():
+                pygame.time.Clock().tick(5)
+
+        pygame.quit()
+
+class Peakasutusliides:
+    def __init__(self, master):
+        self.master = master
+        master.title("Esitusloendi Looja")
+
+        self.label_valik = Label(master, text="Mida soovite:")
+        self.label_valik.pack()
+
+        self.radio_var = StringVar()
+        self.radio_var.set("")
+
+        self.radio_esisusloend = Button(master, text="Juhuslik Esitusloend", command=lambda: self.määra_radio_valik("esisusloend"))
+        self.radio_esisusloend.pack()
+
+        self.radio_raadio = Button(master, text="Nõmme raadio", command=lambda: self.määra_radio_valik("raadio"))
+        self.radio_raadio.pack()
+        
+        self.radio_raadio2 = Button(master, text="Vikerraadio", command=lambda: self.määra_radio_valik("raadio2"))
+        self.radio_raadio2.pack()
+        
+        self.radio_raadio3 = Button(master, text="Dance FM", command=lambda: self.määra_radio_valik("raadio3"))
+        self.radio_raadio3.pack()
+
+    def määra_radio_valik(self, valik):
+        self.radio_var.set(valik)
+        self.master.withdraw()  
+
+        if valik == "esisusloend":
+            self.ava_teine_aken()
+        elif valik == "raadio":
+            self.nõmme_raadio()
+        elif valik == "raadio2":
+            self.vikerraadio()
+        elif valik == "raadio3":
+            self.dancefm()
+
+    def ava_teine_aken(self):
+        teine_aken = Toplevel(self.master)
+        teine_gui = PlaylistGUI(teine_aken)
+
+    def nõmme_raadio(self):
+        url = "http://149.210.138.12:8000/nommeraadio"
+        mängija = vlc.Instance()
+        meediapleier = mängija.media_player_new()
+        meedia = mängija.media_new(url)
+        meedia.get_mrl()
+        meediapleier.set_media(meedia)
+        meediapleier.play()
+        
+    def vikerraadio(self):
+        url = "http://icecast.err.ee/vikerraadio.mp3"    
+        mängija = vlc.Instance()
+        meediapleier = mängija.media_player_new()
+        meedia = mängija.media_new(url)
+        meedia.get_mrl()
+        meediapleier.set_media(meedia)
+        meediapleier.play()
+    
+    def dancefm(self):
+        url = "http://ec1.yesstreaming.net:2570/stream"    
+        mängija = vlc.Instance()
+        meediapleier = mängija.media_player_new()
+        meedia = mängija.media_new(url)
+        meedia.get_mrl()
+        meediapleier.set_media(meedia)
+        meediapleier.play()
+
+
+juur = Tk()
+peakasutusliides = Peakasutusliides(juur)
+juur.mainloop()
