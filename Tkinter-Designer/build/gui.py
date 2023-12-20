@@ -56,11 +56,19 @@ viimati_vajutatud_nupp = None  # Hoiab meeles viimati vajutatud nuppu
 # Funktsioon raadiojaama mängimiseks
 def mängi_raadiojaama(url, nupp):
     global viimati_vajutatud_nupp
-    if viimati_vajutatud_nupp is not None:
-        viimati_vajutatud_nupp.config(relief="flat")  
-    mängija.set_media(vlc.Instance().media_new(url))
-    mängija.play()
-    viimati_vajutatud_nupp = nupp  # määra viimati vajutatud nupp uueks nupuks
+    if viimati_vajutatud_nupp == nupp:
+        # Kui sama nuppu vajutatakse uuesti, siis peata raadio
+        mängija.stop()
+        viimati_vajutatud_nupp = None
+        nupp.config(relief="flat")
+    else:
+        # Kui vajutatakse uut nuppu, mängi vastavat raadiojaama
+        if viimati_vajutatud_nupp is not None:
+            viimati_vajutatud_nupp.config(relief="flat")
+        mängija.set_media(vlc.Instance().media_new(url))
+        mängija.play()
+        viimati_vajutatud_nupp = nupp
+        nupp.config(relief="sunken")
 
 
 # Dance FM
